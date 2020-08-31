@@ -5,28 +5,30 @@ import configparser
 import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+import spotipy.util as util
 
 if os.name == 'nt':
     config = configparser.ConfigParser()
     config.read('config.cfg')
     client_id = config.get('SPOTIFY', 'CLIENT_ID')
     client_secret = config.get('SPOTIFY', 'CLIENT_SECRET')
+    redirect_uri = config.get('SPOTIFY', 'REDIRECT_URI')
 else:
     client_id = os.environ['CLIENT_ID']
     client_secret = os.environ['CLIENT_SECRET']
+    redirect_uri = 'https://formiddag-med-mikael.herokuapp.com:8080'
+
 user = 'chrcarsten'
+scope = "playlist-modify-public"
 
-auth = SpotifyOAuth(
-    client_id=client_id,
-    client_secret=client_secret,
-    redirect_uri='https://formiddag-med-mikael.herokuapp.com:8080',
-    username=user,
-    scope="playlist-modify-public"
+token = util.prompt_for_user_token(
+        username=user,
+        scope=scope,
+        client_id=client_id,
+        client_secret=client_secret,
+        redirect_uri=redirect_uri)
 
-)
-
-token = auth.get_access_token()
-sp = spotipy.Spotify(auth=token['access_token'])
+sp = spotipy.Spotify(auth=token)
 
 
 episode_link = get_newest_episode()
